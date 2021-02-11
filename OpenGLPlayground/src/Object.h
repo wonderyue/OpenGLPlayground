@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -73,9 +74,7 @@ public:
 
 	void load_obj(std::string obj_path)
 	{
-		int path_str_length = obj_path.size();
-		std::string suffix = obj_path.substr(path_str_length - 3, path_str_length);
-
+		std::string suffix = obj_path.substr(obj_path.size() - 3);
 		if (suffix == "obj") {
 			vao_vertices.clear();
 			veo_indices.clear();
@@ -137,7 +136,7 @@ public:
             for (int i = 0; i < indexed_faces.size(); i++) {
                 for (int vi = 0; vi < 3; vi++) {
                     Vertex_Index vertex_index = indexed_faces[i].vertex[vi];
-                    int curIndex = unique_indexed_vertices.size();
+                    unsigned int curIndex = unique_indexed_vertices.size();
                     for (int j = 0; j < curIndex; j++) {
                         if (unique_indexed_vertices[j].pos_idx == vertex_index.pos_idx &&
                             unique_indexed_vertices[j].normal_idx == vertex_index.normal_idx &&
