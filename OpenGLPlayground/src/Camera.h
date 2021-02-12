@@ -30,6 +30,9 @@ public:
     GLfloat pitch = 0.0f;
     GLfloat yaw = -90.0f;
     GLfloat roll = 90.0f;
+    GLfloat fov = 45.0f;
+    GLfloat near = 0.1f;
+    GLfloat far = 100.0f;
 
 	Camera(
 		unsigned int width_ = 800,

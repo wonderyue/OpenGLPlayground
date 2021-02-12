@@ -50,7 +50,6 @@ private:
     
     Object* m_rendering_model;
     
-    
 	void init();
 	
 	void display(GLFWwindow* window);

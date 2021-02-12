@@ -52,14 +52,19 @@ void GUI::init(const std::function<void(model_type)> &callback)
     
     m_gui->addGroup("Configration");
     nanogui::ComboBox* modelComboBox = m_gui->addVariable("Model", m_model_val, true);
+    m_gui->addVariable("near", m_camera->near, true)->setSpinnable(true);
+    m_gui->addVariable("far", m_camera->far, true)->setSpinnable(true);
     modelComboBox->setItems({ "Cube", "Rock", "Cyborg", "Two Cubes" });
     modelComboBox->setCallback([&](int value) {
         m_model_val = (model_type)value;
         m_model_sel_callback(m_model_val);
     });
     m_model_sel_callback(m_model_val);
-    m_gui->addVariable("Mode", m_render_val, true)->setItems({ "Point", "Line", "Trangle" });
-    m_gui->addVariable("Color", m_col_val);
+    m_gui->addVariable("Culling", m_culling_val)->setItems({ "CW", "CCW" });
+    m_gui->addVariable("Mode", m_render_val)->setItems({ "Point", "Line", "Trangle" });
+    m_gui->addVariable("Color", m_col_val, true)->setCallback([&](const nanogui::Color &c) {
+        m_col_val = c;
+    });
     
     m_gui->addButton("Reset", [&]() {
         m_camera->reset();
@@ -120,7 +125,6 @@ void GUI::init(const std::function<void(model_type)> &callback)
     );
 }
 
-
 void GUI::process_keyboard(float delta_time)
 {
     m_camera->update_direction();
@@ -150,7 +154,6 @@ void GUI::process_keyboard(float delta_time)
         m_camera->process_keyboard(ROTATE_Z_DOWN, delta_time);
 }
 
-
 void GUI::refresh()
 {
     m_gui->refresh();
@@ -159,9 +162,4 @@ void GUI::refresh()
 void GUI::draw()
 {
     m_nanogui_screen->drawWidgets();
-}
-
-int GUI::get_render_mode()
-{
-    return render_type_2_gl_type[m_render_val];
 }

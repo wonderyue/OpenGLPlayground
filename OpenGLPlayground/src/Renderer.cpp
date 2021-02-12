@@ -41,11 +41,9 @@ void Renderer::init()
     m_gui->init(std::bind(&Renderer::on_model_change, this, std::placeholders::_1));
 }
 
-
 void Renderer::display(GLFWwindow* window)
 {
 	Shader m_shader = Shader("shader/mvp.vert", "shader/basic.frag");
-    glEnable(GL_DEPTH_TEST | GL_CULL_FACE);
 	// Main frame while loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -83,12 +81,15 @@ void Renderer::draw_scene(Shader& shader)
 	// Set up some basic parameters
 	glClearColor(background_color[0], background_color[1], background_color[2], background_color[3]);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     draw_object(shader, *m_rendering_model);
 }
 
-
 void Renderer::draw_object(Shader& shader, Object& object)
 {
+    glFrontFace(m_gui->get_culling_val());
     glPolygonMode(GL_FRONT_AND_BACK, m_gui->get_render_mode());
 	glBindVertexArray(object.vao);
     glDrawElements(GL_TRIANGLES, object.veo_indices.size(), GL_UNSIGNED_INT, 0);
@@ -106,16 +107,17 @@ void Renderer::setup_uniform_values(Shader& shader)
     view = glm::lookAt(m_camera->cameraPos, m_camera->cameraPos + m_camera->cameraFront, m_camera->cameraUp);
     // Projection
     glm::mat4 projection;
-    projection = glm::perspective(45.0f, (GLfloat)m_camera->width / (GLfloat)m_camera->height, 0.1f, 100.0f);
-
+    projection = glm::perspective(m_camera->fov, (GLfloat)m_camera->width / (GLfloat)m_camera->height, m_camera->near, m_camera->far);
     // Get the uniform locations
     GLint modelLoc = glGetUniformLocation(shader.program, "model");
     GLint viewLoc = glGetUniformLocation(shader.program, "view");
     GLint projLoc = glGetUniformLocation(shader.program, "projection");
+    GLint colorLoc = glGetUniformLocation(shader.program, "color");
     // Pass the matrices to the shader
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3f(colorLoc, (GLfloat)m_gui->get_color_val().r(), (GLfloat)m_gui->get_color_val().g(), (GLfloat)m_gui->get_color_val().b());
 }
 
 void Renderer::on_model_change(model_type type)
