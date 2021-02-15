@@ -25,6 +25,7 @@ public:
     
     Object* get_model(const std::string& path);
     Object* get_model(model_type model_type);
+    const ModelData& get_model_data(model_type model_type);
 private:
     std::unordered_map<std::string, Object*> m_models;
     Object* load(std::string path);

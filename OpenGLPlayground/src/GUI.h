@@ -14,7 +14,7 @@ public:
     {};
     ~GUI();
 
-    void init(const std::function<void(model_type)> &callback);
+    void init(const std::function<void(model_type)> &sel_model, const std::function<void()> &reset);
     void process_keyboard(float delta_time);
     void refresh();
     void draw();
@@ -35,7 +35,12 @@ public:
     nanogui::Color get_color_val() {
         return m_col_val;
     }
-    
+    model_type get_model_val() {
+        return m_model_val;
+    }
+    bool get_auto_rotate() {
+        return m_auto_rotate;
+    }
     
 private:
     static nanogui::Screen* m_nanogui_screen;
@@ -49,4 +54,9 @@ private:
     depth_type m_depth_val = LESS;
     nanogui::Color m_col_val = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
     std::function<void(model_type)> m_model_sel_callback;
+    std::function<void()> m_reset_callback;
+    bool m_auto_rotate = false;
+    nanogui::Slider *x_slider;
+    nanogui::Slider *y_slider;
+    nanogui::Slider *z_slider;
 };

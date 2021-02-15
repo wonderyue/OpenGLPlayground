@@ -60,8 +60,6 @@ private:
 
 	void draw_object(Shader& shader, Object& object);
 
-	void bind_vaovbo(Object &cur_obj);
-
 	void setup_uniform_values(Shader& shader);
 	void scene_reset();
 };

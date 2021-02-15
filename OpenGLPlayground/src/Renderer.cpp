@@ -38,7 +38,8 @@ void Renderer::init()
 	glewExperimental = GL_TRUE;
 	glewInit();
     m_gui = new GUI(this->m_window, m_camera);
-    m_gui->init(std::bind(&Renderer::on_model_change, this, std::placeholders::_1));
+    m_gui->init(std::bind(&Renderer::on_model_change, this, std::placeholders::_1),
+                std::bind(&Renderer::scene_reset, this));
 }
 
 void Renderer::display(GLFWwindow* window)
@@ -73,7 +74,8 @@ void Renderer::display(GLFWwindow* window)
 
 void Renderer::scene_reset()
 {
-	m_camera->reset();
+    const ResourceManager::ModelData& data = m_res_manager->get_model_data(m_gui->get_model_val());
+    m_camera->reset(data.position, data.rotation);
 }
 
 void Renderer::draw_scene(Shader& shader)
@@ -101,7 +103,8 @@ void Renderer::setup_uniform_values(Shader& shader)
 {
     // Model
     glm::mat4 model = glm::mat4(1.0f);
-//    model = glm::rotate(model, 3.14f* sinf(glfwGetTime()), glm::vec3(1.0f, 1.0f, 0.0f));
+    if (m_gui->get_auto_rotate())
+        model = glm::rotate(model, 3.14f* sinf(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
     // Camera/View transformation
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::lookAt(m_camera->cameraPos, m_camera->cameraPos + m_camera->cameraFront, m_camera->cameraUp);
@@ -123,4 +126,5 @@ void Renderer::setup_uniform_values(Shader& shader)
 void Renderer::on_model_change(model_type type)
 {
     m_rendering_model = m_res_manager->get_model(type);
+    scene_reset();
 }

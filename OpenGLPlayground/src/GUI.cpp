@@ -10,11 +10,12 @@ GUI::~GUI()
 {
 }
 
-void GUI::init(const std::function<void(model_type)> &callback)
+void GUI::init(const std::function<void(model_type)> &sel_model, const std::function<void()> &reset)
 {
     m_nanogui_screen = new nanogui::Screen();
     m_nanogui_screen->initialize(m_gl_window, true);
-    m_model_sel_callback = callback;
+    m_model_sel_callback = sel_model;
+    m_reset_callback = reset;
     glViewport(0, 0, m_camera->width, m_camera->height);
 
     // Create nanogui gui
@@ -28,26 +29,26 @@ void GUI::init(const std::function<void(model_type)> &callback)
     m_gui->addVariable("z", m_camera->cameraPos.z, true)->setSpinnable(true);
     
     m_gui->addGroup("Rotation");
-    nanogui::Slider *x_slider = new nanogui::Slider(m_gui->addVariable("x", m_camera->pitch, false));
+    x_slider = new nanogui::Slider(m_gui->addVariable("x", m_camera->cameraAngle.x, false));
     x_slider->setFixedSize(Eigen::Vector2i(120,20));
     x_slider->setRange(std::pair<float, float>(-180,180));
-    x_slider->setValue(m_camera->pitch);
+    x_slider->setValue(m_camera->cameraAngle.x);
     x_slider->setCallback([&](float value) {
-        m_camera->pitch = value;
+        m_camera->cameraAngle.x = value;
     });
-    nanogui::Slider *y_slider = new nanogui::Slider(m_gui->addVariable("y", m_camera->yaw, false));
+    y_slider = new nanogui::Slider(m_gui->addVariable("y", m_camera->cameraAngle.y, false));
     y_slider->setFixedSize(Eigen::Vector2i(120,20));
     y_slider->setRange(std::pair<float, float>(-180,180));
-    y_slider->setValue(m_camera->yaw);
+    y_slider->setValue(m_camera->cameraAngle.y);
     y_slider->setCallback([&](float value) {
-        m_camera->yaw = value;
+        m_camera->cameraAngle.y = value;
     });
-    nanogui::Slider *z_slider = new nanogui::Slider(m_gui->addVariable("z", m_camera->roll, false));
+    z_slider = new nanogui::Slider(m_gui->addVariable("z", m_camera->cameraAngle.z, false));
     z_slider->setFixedSize(Eigen::Vector2i(120,20));
     z_slider->setRange(std::pair<float, float>(-180,180));
-    z_slider->setValue(m_camera->roll);
+    z_slider->setValue(m_camera->cameraAngle.z);
     z_slider->setCallback([&](float value) {
-        m_camera->roll = value;
+        m_camera->cameraAngle.z = value;
     });
     
     m_gui->addGroup("Configration");
@@ -62,12 +63,13 @@ void GUI::init(const std::function<void(model_type)> &callback)
     m_model_sel_callback(m_model_val);
     m_gui->addVariable("Culling", m_culling_val)->setItems({ "CW", "CCW" });
     m_gui->addVariable("Mode", m_render_val)->setItems({ "Point", "Line", "Trangle" });
+    m_gui->addVariable("Auto Rotate", m_auto_rotate);
     m_gui->addVariable("Color", m_col_val, true)->setCallback([&](const nanogui::Color &c) {
         m_col_val = c;
     });
     
     m_gui->addButton("Reset", [&]() {
-        m_camera->reset();
+        m_reset_callback();
     })->setTooltip("Reset camera position and rotation.");
     
     m_nanogui_screen->setVisible(true);
@@ -157,6 +159,9 @@ void GUI::process_keyboard(float delta_time)
 void GUI::refresh()
 {
     m_gui->refresh();
+    x_slider->setValue(m_camera->cameraAngle.x);
+    y_slider->setValue(m_camera->cameraAngle.y);
+    z_slider->setValue(m_camera->cameraAngle.z);
 }
 
 void GUI::draw()

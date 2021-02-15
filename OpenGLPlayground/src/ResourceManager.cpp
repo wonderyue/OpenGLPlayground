@@ -4,9 +4,9 @@
 
 const std::vector<ResourceManager::ModelData> model_type_2_data = {
     ResourceManager::ModelData("model/cube.obj", glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, -90.0f,  90.0f)),
-    ResourceManager::ModelData("model/rock.obj", glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, -90.0f,  90.0f)),
-    ResourceManager::ModelData("model/cyborg.obj", glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, -90.0f,  90.0f)),
-    ResourceManager::ModelData("model/two_cubes.obj", glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, -90.0f,  90.0f)),
+    ResourceManager::ModelData("model/rock.obj", glm::vec3(0.0f, 0.0f,  6.75f), glm::vec3(0.0f, -90.0f,  90.0f)),
+    ResourceManager::ModelData("model/cyborg.obj", glm::vec3(0.0f, 2.0f,  5.0f), glm::vec3(0.0f, -90.0f,  90.0f)),
+    ResourceManager::ModelData("model/two_cubes.obj", glm::vec3(-5.0f, 0.0f,  -1.0f), glm::vec3(0.0f, 0.0f,  90.0f)),
 };
 
 ResourceManager::ResourceManager()
@@ -32,7 +32,6 @@ Object* ResourceManager::load(std::string path)
     // Bind vertices to Array Buffer
     glBindBuffer(GL_ARRAY_BUFFER, obj->vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Object::Vertex) * obj->vao_vertices.size(), &obj->vao_vertices[0], GL_STATIC_DRAW);
-
     // Bind indices to Element Array Buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, obj->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * obj->veo_indices.size(), &obj->veo_indices[0], GL_STATIC_DRAW);
@@ -45,14 +44,10 @@ Object* ResourceManager::load(std::string path)
     // Texture Coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Object::Vertex), (GLvoid*)offsetof(Object::Vertex, TexCoords));
     glEnableVertexAttribArray(2);
-
-    glBindVertexArray(0); // Unbind VAO
-    /*
-    * TODO: You can also set Camera parameters here
-    */
+    // Unbind VAO
+    glBindVertexArray(0);
     return obj;
 }
-
 
 Object* ResourceManager::get_model(const std::string& path)
 {
@@ -65,4 +60,9 @@ Object* ResourceManager::get_model(const std::string& path)
 Object* ResourceManager::get_model(model_type type)
 {
     return get_model(model_type_2_data[type].path);
+}
+
+const ResourceManager::ModelData& ResourceManager::get_model_data(model_type type)
+{
+    return model_type_2_data[type];
 }

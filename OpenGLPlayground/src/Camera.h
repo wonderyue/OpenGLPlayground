@@ -27,9 +27,7 @@ public:
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
     GLfloat angleSpeed = 1.0f;
-    GLfloat pitch = 0.0f;
-    GLfloat yaw = -90.0f;
-    GLfloat roll = 90.0f;
+    glm::vec3 cameraAngle   = glm::vec3(0.0f, -90.0f, 90.0f);
     GLfloat fov = 45.0f;
     GLfloat near = 0.1f;
     GLfloat far = 100.0f;
@@ -44,27 +42,24 @@ public:
 	}
 
 	void init() {
-		reset();
 	};
 
-	void reset() {
-        cameraPos = glm::vec3(0.0f, 0.0f,  3.0f);
-        pitch = 0.0f;
-        yaw = -90.0f;
-        roll = 90.0f;
+	void reset(glm::vec3 position, glm::vec3 rotation) {
+        cameraPos = position;
+        cameraAngle = rotation;
 	}
     
     void update_direction()
     {
         glm::vec3 front;
-        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        front.y = sin(glm::radians(pitch));
-        front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.x = cos(glm::radians(cameraAngle.y)) * cos(glm::radians(cameraAngle.x));
+        front.y = sin(glm::radians(cameraAngle.x));
+        front.z = sin(glm::radians(cameraAngle.y)) * cos(glm::radians(cameraAngle.x));
         cameraFront = glm::normalize(front);
         glm::vec3 up;
-        up.x = -cos(glm::radians(yaw)) * sin(glm::radians(pitch)) * sin(glm::radians(roll)) - sin(glm::radians(yaw)) * cos(glm::radians(roll));
-        up.y = cos(glm::radians(pitch)) * sin(glm::radians(roll));
-        up.z = -sin(glm::radians(yaw)) * sin(glm::radians(pitch)) * sin(glm::radians(roll)) + cos(glm::radians(yaw)) * cos(glm::radians(roll));
+        up.x = -cos(glm::radians(cameraAngle.y)) * sin(glm::radians(cameraAngle.x)) * sin(glm::radians(cameraAngle.z)) - sin(glm::radians(cameraAngle.y)) * cos(glm::radians(cameraAngle.z));
+        up.y = cos(glm::radians(cameraAngle.x)) * sin(glm::radians(cameraAngle.z));
+        up.z = -sin(glm::radians(cameraAngle.y)) * sin(glm::radians(cameraAngle.x)) * sin(glm::radians(cameraAngle.z)) + cos(glm::radians(cameraAngle.y)) * cos(glm::radians(cameraAngle.z));
         cameraUp = glm::normalize(up);
     }
 
@@ -89,22 +84,22 @@ public:
             cameraPos -= cameraSpeed * cameraUp;
 		}
 		if (direction == ROTATE_X_UP) {
-            pitch += angleSpeed;
+            cameraAngle.x += angleSpeed;
 		}
 		if (direction == ROTATE_X_DOWN) {
-            pitch -= angleSpeed;
+            cameraAngle.x -= angleSpeed;
 		}
 		if (direction == ROTATE_Y_UP) {
-            yaw += angleSpeed;
+            cameraAngle.y += angleSpeed;
 		}
 		if (direction == ROTATE_Y_DOWN) {
-            yaw -= angleSpeed;
+            cameraAngle.y -= angleSpeed;
 		}
 		if (direction == ROTATE_Z_UP) {
-            roll += angleSpeed;
+            cameraAngle.z += angleSpeed;
 		}
 		if (direction == ROTATE_Z_DOWN) {
-            roll -= angleSpeed;
+            cameraAngle.z -= angleSpeed;
 		}
 	}
 };
