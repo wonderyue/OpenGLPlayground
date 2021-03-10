@@ -1,12 +1,13 @@
 #include "ResourceManager.h"
-#include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 
 
 const std::vector<ResourceManager::ModelData> model_type_2_data = {
-    ResourceManager::ModelData("model/cube.obj", glm::vec3(0.0f, 0.0f,  3.0f), glm::vec3(0.0f, -90.0f,  90.0f)),
+    ResourceManager::ModelData("model/cube.obj", glm::vec3(-1.0f, 0.0f,  3.0f), glm::vec3(0.0f, -90.0f,  90.0f)),
     ResourceManager::ModelData("model/rock.obj", glm::vec3(0.0f, 0.0f,  6.75f), glm::vec3(0.0f, -90.0f,  90.0f)),
     ResourceManager::ModelData("model/cyborg.obj", glm::vec3(0.0f, 2.0f,  5.0f), glm::vec3(0.0f, -90.0f,  90.0f)),
-    ResourceManager::ModelData("model/two_cubes.obj", glm::vec3(-5.0f, 0.0f,  -1.0f), glm::vec3(0.0f, 0.0f,  90.0f)),
+    ResourceManager::ModelData("model/two_cubes.obj", glm::vec3(-3.2f, 0.15f, 4.37f), glm::vec3(0.0f, -70.0f,  90.0f)),
 };
 
 ResourceManager::ResourceManager()

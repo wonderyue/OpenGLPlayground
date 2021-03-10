@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#define GLFW_INCLUDE_GLCOREARB
+#include <GLFW/glfw3.h>
 
 
 

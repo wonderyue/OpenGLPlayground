@@ -26,3 +26,4 @@ enum model_type {
 
 const std::vector<int> render_type_2_gl_type = {GL_POINT, GL_LINE, GL_FILL};
 const std::vector<int> culling_type_2_gl_type = {GL_CW, GL_CCW};
+const std::vector<int> depth_type_2_gl_type = {GL_LESS, GL_ALWAYS};

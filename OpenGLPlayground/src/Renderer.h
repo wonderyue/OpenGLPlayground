@@ -4,6 +4,7 @@
 
 #define GLEW_STATIC
 #include <GL/glew.h>
+#define GLFW_INCLUDE_GLCOREARB
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -32,7 +33,7 @@ public:
 
 	static Camera* m_camera;
     static ResourceManager* m_res_manager;
-	// static Lighting* m_lightings;
+    static Lighting* m_lighting;
 
 	glm::vec4 background_color = glm::vec4(0.0,0.0,0.0,0.0);
 
@@ -50,11 +51,14 @@ private:
     
     Object* m_rendering_model;
     
+    std::vector<Shader> m_shaders;
+    
 	void init();
-	
+    
 	void display(GLFWwindow* window);
+    void update();
 	
-	void on_model_change(model_type mode_type);
+	Object* on_model_change(model_type mode_type);
     
 	void draw_scene(Shader& shader);
 
