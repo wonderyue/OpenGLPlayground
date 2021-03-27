@@ -86,8 +86,13 @@ void GUI::init(const std::function<Object*(model_type)> &sel_model, const std::f
         m_shininess = v;
         m_object->shininess = v;
     });
+    m_lighting_window->addVariable("Texture Mapping", m_texture_mapping_enable);
+    m_lighting_window->addVariable("Normal Mapping", m_normal_mapping_enable);
     
     m_lighting_window->addVariable("Directional Light", m_direction_light_enable);
+    m_lighting_window->addVariable("Directional Light x", m_lighting->direction_light.dir.x, true)->setSpinnable(true);
+    m_lighting_window->addVariable("Directional Light y", m_lighting->direction_light.dir.y, true)->setSpinnable(true);
+    m_lighting_window->addVariable("Directional Light z", m_lighting->direction_light.dir.z, true)->setSpinnable(true);
     m_lighting_window->addVariable("Ambient Strength", m_lighting->direction_light.ambient_strength, true)->setSpinnable(true);;
     m_lighting_window->addVariable("Ambient Color", m_direction_ambient_color, true)->setCallback([&](const nanogui::Color &c) {
         m_direction_ambient_color = c;

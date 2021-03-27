@@ -79,6 +79,12 @@ public:
     bool get_point_light_rotate_z() {
         return m_point_light_rotate_z;
     }
+    bool get_texture_mapping_enable() {
+        return m_texture_mapping_enable;
+    }
+    bool get_normal_mapping_enable() {
+        return m_normal_mapping_enable;
+    }
     
 private:
     static nanogui::Screen* m_nanogui_screen;
@@ -112,6 +118,8 @@ private:
     bool m_point_light_rotate_x = false;
     bool m_point_light_rotate_y = false;
     bool m_point_light_rotate_z = false;
+    bool m_texture_mapping_enable = false;
+    bool m_normal_mapping_enable = false;
     
     void update_object_params();
     void nanoColor2vec(const nanogui::Color& c, glm::vec4& v) {

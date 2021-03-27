@@ -33,8 +33,8 @@ public:
     GLfloat far = 100.0f;
 
 	Camera(
-		unsigned int width_ = 1024,
-		unsigned int height_ = 768
+		unsigned int width_ = 2560,
+		unsigned int height_ = 1600
 	)
 	{
 		this->width = width_;

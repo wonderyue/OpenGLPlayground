@@ -10,6 +10,7 @@
 #define GLFW_INCLUDE_GLCOREARB
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/epsilon.hpp>
 
 class Object
 {
@@ -21,10 +22,16 @@ public:
 		glm::vec3 Normal;
 		// TexCoords
 		glm::vec2 TexCoords;
-        Vertex(const glm::vec3& p, const glm::vec3& n, const glm::vec2& t) {
+        // Tangent
+        glm::vec3 Tangent;
+        // Bitangent
+        glm::vec3 Bitangent;
+        Vertex(const glm::vec3& p, const glm::vec3& n, const glm::vec2& t, const glm::vec3& tan, const glm::vec3& bitan) {
             Position = p;
             Normal = n;
             TexCoords = t;
+            Tangent = tan;
+            Bitangent = bitan;
         }
 	};
 
@@ -36,49 +43,35 @@ public:
 
 	struct Face_Index {
 		Vertex_Index vertex[3];
+        glm::vec3 tangent;
+        glm::vec3 bitangent;
 	};
-
-	// veo and vao vector
-	std::vector<Vertex> vao_vertices;
-	std::vector<unsigned int> veo_indices;
-
-	// obj original data vector
-	std::vector<glm::vec3> ori_positions;
-	std::vector<glm::vec3> ori_normals;
-	std::vector<glm::vec2> ori_texcoords;
-
-	// obj face index vector
-	std::vector<Face_Index> indexed_faces;
-
-	glm::vec3 obj_center;
 
 	glm::vec3 max_bound = glm::vec3(INT_MIN);
 	glm::vec3 min_bound = glm::vec3(INT_MAX);
+    
+    //vao vector
+    std::vector<Vertex> vao_vertices;
 
 	glm::vec4 obj_color = glm::vec4(0.7, 0.7, 0.7, 1.0);
 	GLfloat shininess = 32.0f;
 
-	std::string m_obj_path;
-	std::string obj_name;
-
-	GLuint vao, vbo, ebo;
+	GLuint vao, vbo;
 
 public:
-	Object(std::string obj_path) { 
+	Object(const std::string& obj_path) { 
 		m_obj_path = obj_path;
 		load_obj(m_obj_path);
 	};
 
 	~Object() {};
-
-	void load_obj(std::string obj_path)
+    
+	void load_obj(const std::string& obj_path)
 	{
 		std::string suffix = obj_path.substr(obj_path.size() - 3);
 		if (suffix == "obj") {
 			vao_vertices.clear();
-			veo_indices.clear();
 			indexed_faces.clear();
-
 			ori_positions.clear();
 			ori_normals.clear();
 			ori_texcoords.clear();
@@ -123,6 +116,26 @@ public:
 							face_idx.vertex[i].texcoord_idx = tex_idx > 0 ? tex_idx - 1 : -1;
 							face_idx.vertex[i].normal_idx = norm_idx > 0 ? norm_idx - 1 : -1;
 						}
+                        // calculate tangent/bitangent vectors
+                        glm::vec3 tangent, bitangent;
+                        glm::vec3 edge1 = ori_positions[face_idx.vertex[1].pos_idx] - ori_positions[face_idx.vertex[0].pos_idx];
+                        glm::vec3 edge2 = ori_positions[face_idx.vertex[2].pos_idx] - ori_positions[face_idx.vertex[0].pos_idx];
+                        glm::vec2 deltaUV1 = ori_texcoords[face_idx.vertex[1].texcoord_idx] - ori_texcoords[face_idx.vertex[0].texcoord_idx];
+                        glm::vec2 deltaUV2 = ori_texcoords[face_idx.vertex[2].texcoord_idx] - ori_texcoords[face_idx.vertex[0].texcoord_idx];
+
+                        GLfloat f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+                        tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+                        tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+                        tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+                        tangent = glm::normalize(tangent);
+
+                        bitangent.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+                        bitangent.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+                        bitangent.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+                        bitangent = glm::normalize(bitangent);
+                        face_idx.tangent = tangent;
+                        face_idx.bitangent = bitangent;
 						indexed_faces.push_back(face_idx);
 					}
 				}
@@ -130,29 +143,28 @@ public:
 			catch (const std::exception&) {
 				std::cout << "Error: Obj file cannot be read\n";
 			}
-            // indices
-            std::vector<Vertex_Index> unique_indexed_vertices;
             for (int i = 0; i < indexed_faces.size(); i++) {
-                for (int vi = 0; vi < 3; vi++) {
-                    Vertex_Index vertex_index = indexed_faces[i].vertex[vi];
-                    unsigned int curIndex = unique_indexed_vertices.size();
-                    for (int j = 0; j < curIndex; j++) {
-                        if (unique_indexed_vertices[j].pos_idx == vertex_index.pos_idx &&
-                            unique_indexed_vertices[j].normal_idx == vertex_index.normal_idx &&
-                            unique_indexed_vertices[j].texcoord_idx == vertex_index.texcoord_idx)
-                        curIndex = j;
-                        break;
-                    }
-                    if (curIndex == unique_indexed_vertices.size()) {
-                        unique_indexed_vertices.push_back(vertex_index);
-                    }
-                    veo_indices.push_back(curIndex);
+                for (int j = 0; j < 3; j++) {
+                    Vertex_Index vi = indexed_faces[i].vertex[j];
+                    vao_vertices.push_back(Vertex(ori_positions[vi.pos_idx], ori_normals[vi.normal_idx], ori_texcoords[vi.texcoord_idx],
+                                                  indexed_faces[i].tangent, indexed_faces[i].bitangent));
                 }
             }
-            // vertices
-            for (Vertex_Index vi : unique_indexed_vertices) {
-                vao_vertices.push_back(Vertex(ori_positions[vi.pos_idx], ori_normals[vi.normal_idx], ori_texcoords[vi.texcoord_idx]));
-            }
+            indexed_faces.clear();
+            ori_positions.clear();
+            ori_normals.clear();
+            ori_texcoords.clear();
 		}
 	};
+    
+private:
+    std::string m_obj_path;
+
+    // obj original data vector
+    std::vector<glm::vec3> ori_positions;
+    std::vector<glm::vec3> ori_normals;
+    std::vector<glm::vec2> ori_texcoords;
+
+    // obj face index vector
+    std::vector<Face_Index> indexed_faces;
 };

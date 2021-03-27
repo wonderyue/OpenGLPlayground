@@ -67,6 +67,7 @@ void Renderer::display(GLFWwindow* window)
         update();
         
 		setup_uniform_values(m_shader);
+        bind_texture(m_shader);
 
 		draw_scene(m_shader);
         
@@ -103,7 +104,7 @@ void Renderer::draw_object(Shader& shader, Object& object)
     glFrontFace(m_gui->get_culling_val());
     glPolygonMode(GL_FRONT_AND_BACK, m_gui->get_render_mode());
 	glBindVertexArray(object.vao);
-    glDrawElements(GL_TRIANGLES, object.veo_indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, object.vao_vertices.size());
 	glBindVertexArray(0);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
@@ -132,7 +133,7 @@ void Renderer::setup_uniform_values(Shader& shader)
     GLint directionDiffuseColorLoc = glGetUniformLocation(shader.program, "directionDiffuseColor");
     GLint directionSpecularColorLoc = glGetUniformLocation(shader.program, "directionSpecularColor");
     //point light
-    GLint lightPosLoc = glGetUniformLocation(shader.program, "pointLightPos");
+    GLint pointLightPosLoc = glGetUniformLocation(shader.program, "pointLightPos");
     GLint pointAmbientStrengthLoc = glGetUniformLocation(shader.program, "pointAmbientStrength");
     GLint ambientColorLoc = glGetUniformLocation(shader.program, "pointAmbientColor");
     GLint diffuseColorLoc = glGetUniformLocation(shader.program, "pointDiffuseColor");
@@ -145,7 +146,7 @@ void Renderer::setup_uniform_values(Shader& shader)
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
     glUniform3f(colorLoc, m_rendering_model->obj_color.x, m_rendering_model->obj_color.y, m_rendering_model->obj_color.z);
-    glUniform3f(lightPosLoc, m_lighting->point_light.pos.x, m_lighting->point_light.pos.y, m_lighting->point_light.pos.z);
+    glUniform3f(pointLightPosLoc, m_lighting->point_light.pos.x, m_lighting->point_light.pos.y, m_lighting->point_light.pos.z);
     glUniform3f(directionLightDirLoc, m_lighting->direction_light.dir.x, m_lighting->direction_light.dir.y, m_lighting->direction_light.dir.z);
     glUniform3f(viewPosLoc, m_camera->cameraPos.x, m_camera->cameraPos.y, m_camera->cameraPos.z);
     glUniform1i(shininessLoc, m_rendering_model->shininess);
@@ -171,6 +172,28 @@ void Renderer::setup_uniform_values(Shader& shader)
     }
 }
 
+void Renderer::bind_texture(Shader &shader)
+{
+    glUniform1i(glGetUniformLocation(shader.program, "useTextureMapping"), m_gui->get_texture_mapping_enable());
+    glUniform1i(glGetUniformLocation(shader.program, "useNormalMapping"), m_gui->get_normal_mapping_enable());
+    if (m_gui->get_texture_mapping_enable()) {
+        Texture* tex = m_res_manager->get_texture(m_gui->get_model_val());
+        if (tex == NULL)
+            return;
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, tex->texture);
+        glUniform1i(glGetUniformLocation(shader.program, "textureMap"), 0);
+    }
+    if (m_gui->get_normal_mapping_enable()) {
+        Texture* normal = m_res_manager->get_normal(m_gui->get_model_val());
+        if (normal == NULL)
+            return;
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, normal->texture);
+        glUniform1i(glGetUniformLocation(shader.program, "normalMap"), 1);
+    }
+}
+
 Object* Renderer::on_model_change(model_type type)
 {
     m_rendering_model = m_res_manager->get_model(type);
@@ -186,3 +209,4 @@ void Renderer::update()
         m_lighting->point_light.pos = rotation * glm::vec4(m_lighting->point_light.pos, 1.0f);
     }
 }
+

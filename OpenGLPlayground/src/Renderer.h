@@ -14,11 +14,6 @@
 
 #include <nanogui/nanogui.h>
 
-// NOTE: do not define STB_IMAGE_IMPLEMENTATION
-// 	     it would conflict with nanovg.c (libnanogui.a)
-// #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 #include "Shader.h"
 #include "Camera.h"
 #include "Object.h"
@@ -65,6 +60,7 @@ private:
 	void draw_object(Shader& shader, Object& object);
 
 	void setup_uniform_values(Shader& shader);
+    void bind_texture(Shader& shader);
 	void scene_reset();
 };
 

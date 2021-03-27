@@ -4,6 +4,7 @@ out vec4 color;
 flat in vec3 Normal;
 in vec3 FragPos;
 in vec3 ObjectColor;
+in vec2 TexCoord;
 
 uniform vec3 directionLightDir;
 uniform vec3 directionAmbientColor;
@@ -17,6 +18,8 @@ uniform vec3 pointSpecularColor;
 uniform float pointAmbientStrength;
 uniform int shininess;
 uniform vec3 viewPos;
+uniform sampler2D textureMap;
+uniform bool useTextureMapping;
 
 
 vec3 phong_lighting_model(vec3 lightDir, vec3 normal, vec3 viewDir, vec3 ambientColor, vec3 diffuseColor, vec3 specularColor, float ambientStrength)
@@ -42,5 +45,13 @@ void main()
     vec3 result = phong_lighting_model(dirLightDir, normal, viewDir, directionAmbientColor, directionDiffuseColor, directionSpecularColor, directionAmbientStrength);
     // Point Light
     result += phong_lighting_model(pointLightDir, normal, viewDir, pointAmbientColor, pointDiffuseColor, pointSpecularColor, pointAmbientStrength);
-    color = vec4(result * ObjectColor, 1.0f);
+    if (useTextureMapping)
+    {
+        vec4 texColor = texture(textureMap, TexCoord);
+        color = vec4(result * ObjectColor * texColor.xyz, texColor.w);
+    }
+    else
+    {
+        color = vec4(result * ObjectColor, 1.0f);
+    }
 }
